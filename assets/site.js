@@ -20,7 +20,7 @@ function histogram(records, field) {
 function drawChart() {
   const counts = histogram(papers, 'year');
   const last = Math.max(...counts.keys());
-  const years = Array.from({length: 7}, (_, i) => last - 6 + i);
+  const years = Array.from({length: last - 2019 + 1}, (_, i) => 2019 + i);
   const max = Math.max(...years.map(y => counts.get(y) || 0));
   for (const year of years) {
     const total = counts.get(year) || 0;
