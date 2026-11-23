@@ -21,4 +21,12 @@ Review the changes to assets/publications.js and commit that file. To maintain a
 - A paper is a conference, workshop (including non-archival), or journal entry. The count is per venue appearance. A matching normalized title, year and venue counts once. Where the venue abbreviation is empty, the full citation distinguishes appearances. Edited volumes and monographs have a separate collection.
 - Rank and index labels come directly from the worksheet. A dash or blank appears as Unranked. Rank sorting groups conference labels, then journal quartiles, then other labels. Within each label the newest entries appear first.
 - Topic labels are suggested using title keywords. To curate them, add a Topic column to the publications worksheet. Enter one or more labels separated by a vertical bar. The first label is the primary topic for sorting; filtering matches any assigned label.
-- Direct paper links come from hyperlinks attached to bibliographic cells. Entries without such links retain their full citation.
+- The published cards use the verified URLs in assets/paper-previews.js. For newly imported entries, they use the worksheet link until a curated preview is available.
+
+## Publication previews
+
+The catalogue includes short, source-linked summaries and abstract excerpts. The paper title opens the publication. If the available source is a workshop version, conference presentation or project page, the card identifies it. Click a thumbnail to load the high-resolution figure on the same page. Choose Actual size to inspect labels and scroll around the figure, or Fit to screen to see the whole illustration. Close the viewer with the Close button or Escape. Its caption links to the figure on the publisher site or to the relevant page of a source PDF.
+
+The preview data is separate from the workbook import. Entries are matched using the year, venue, title and full citation to distinguish different appearances of the same work. Update the matching key if you change any of those fields in the worksheet. Store new thumbnail images in assets/figures. The files work entirely offline except for outbound source links.
+
+The per-entry inventory in tools/publication-coverage.csv lists the link, snippet source and visual source for the November 2026 snapshot. A blank visual field means no verified illustration was bundled for that entry. Where a source table or poster diagram was selected, the card identifies it explicitly.

@@ -38,21 +38,80 @@ function paperCard(record) {
   const card = element('article', undefined, 'paper');
   const details = element('div');
   const metadata = [record.venue, record.rank, record.kind].filter(Boolean).join(' · ');
+  const preview = paperPreviews[JSON.stringify([record.year, record.venue, record.title, record.citation])] || {};
+  const paperUrl = preview.url ?? record.url;
   const heading = element('h3', record.title);
-  if (record.url) {
+  if (paperUrl && !preview.linkLabel) {
     const link = element('a', record.title);
-    link.href = record.url;
+    link.href = paperUrl;
     heading.replaceChildren(link);
   }
   const citation = element('details');
   citation.append(element('summary', 'Full citation'), element('p', record.citation));
-  details.append(element('div', metadata, 'meta'), heading, element('p', record.authors),
-    element('div', record.topics.join(' · '), 'tags'), citation);
+  details.append(element('div', metadata, 'meta'), heading, element('p', record.authors));
+  if (preview.linkLabel && paperUrl) {
+    const version = element('a', preview.linkLabel, 'version-link');
+    version.href = paperUrl;
+    details.append(version);
+  }
+  if (preview.visual) {
+    const visual = preview.visual;
+    const figure = element('figure', undefined, 'paper-figure');
+    const zoom = element('button', undefined, 'figure-button');
+    zoom.type = 'button';
+    zoom.setAttribute('aria-haspopup', 'dialog');
+    zoom.setAttribute('aria-label', 'Enlarge ' + visual.label + ' from ' + record.title);
+    const img = element('img');
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.width = visual.width;
+    img.height = visual.height;
+    img.src = visual.image;
+    img.alt = visual.alt;
+    zoom.append(img);
+    zoom.addEventListener('click', () => {
+      const viewer = byId('figure-viewer');
+      const enlarged = viewer.querySelector('img');
+      enlarged.src = visual.fullImage || visual.image;
+      viewer.classList.remove('actual-size');
+      byId('viewer-zoom').textContent = 'Actual size';
+      enlarged.alt = visual.alt;
+      byId('viewer-title').textContent = visual.label + ' · ' + record.title;
+      viewer.showModal();
+    });
+    const caption = element('figcaption');
+    const source = element('a', visual.label + ' · View source');
+    source.href = visual.source;
+    caption.append(source);
+    figure.append(zoom, caption);
+    details.prepend(figure);
+  }
+  if (preview.text) {
+    const summary = element('p', undefined, 'paper-summary');
+    const label = element('a', preview.proseLabel || 'Abstract excerpt', 'preview-label');
+    label.href = preview.textSource || paperUrl;
+    summary.append(label, ' ', preview.text);
+    details.append(summary);
+  }
+  const foot = element('div', undefined, 'paper-foot');
+  foot.append(element('span', record.topics.join(' · '), 'tags'), citation);
+  details.append(foot);
   card.append(element('strong', record.year), details);
   return card;
 }
 
 function archive() {
+  const viewer = byId('figure-viewer');
+  const zoomControl = byId('viewer-zoom');
+  zoomControl.addEventListener('click', () => {
+    const actualSize = viewer.classList.toggle('actual-size');
+    zoomControl.textContent = actualSize ? 'Fit to screen' : 'Actual size';
+    viewer.querySelector('.viewer-stage').scrollTo(0, 0);
+  });
+  byId('viewer-close').addEventListener('click', () => viewer.close());
+  viewer.addEventListener('click', event => {
+    if (event.target === viewer) viewer.close();
+  });
   const counts = histogram(papers, 'rank');
   const weight = label => labelOrder.includes(label) ? labelOrder.indexOf(label) : labelOrder.length;
   const rankOrder = (a,b) => weight(a) - weight(b) || a.localeCompare(b);
