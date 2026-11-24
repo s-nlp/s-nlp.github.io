@@ -1,6 +1,6 @@
 # S-NLP research group website
 
-Open index.html in your browser to preview the site. To publish on the existing GitHub Pages site, copy index.html, publications.html, contact.html, alexander.html, events.html and the entire assets directory into its publishing folder. Keep the same relative paths. The site runs directly from these files.
+Open index.html in your browser to preview the site. To publish on the existing GitHub Pages site, copy index.html, publications.html, contact.html, courses.html, top-papers.html, alumni.html, events.html and the entire assets directory into its publishing folder. Keep the same relative paths. The site runs directly from these files.
 
 ## Maintaining the publication catalogue
 

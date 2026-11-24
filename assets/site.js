@@ -18,6 +18,7 @@ function histogram(records, field) {
 }
 
 function drawChart() {
+  byId('chart').replaceChildren();
   const counts = histogram(papers, 'year');
   const last = Math.max(...counts.keys());
   const years = Array.from({length: last - 2019 + 1}, (_, i) => 2019 + i);
@@ -78,6 +79,7 @@ function paperCard(record) {
       enlarged.alt = visual.alt;
       byId('viewer-title').textContent = visual.label + ' · ' + record.title;
       viewer.showModal();
+      sizeFigure(viewer);
     });
     const caption = element('figcaption');
     const source = element('a', visual.label + ' · View source');
@@ -100,18 +102,39 @@ function paperCard(record) {
   return card;
 }
 
-function archive() {
+function sizeFigure(viewer) {
+  if (!viewer.open) return;
+  const stage = viewer.querySelector('.viewer-stage');
+  const image = stage.querySelector('img');
+  if (viewer.classList.contains('actual-size') || !image.naturalWidth) {
+    image.style.removeProperty('width');
+    image.style.removeProperty('height');
+    return;
+  }
+  const scale = Math.min(1, stage.clientWidth / image.naturalWidth, stage.clientHeight / image.naturalHeight);
+  image.style.width = Math.floor(image.naturalWidth * scale) + 'px';
+  image.style.height = Math.floor(image.naturalHeight * scale) + 'px';
+}
+
+function setupFigureViewer() {
   const viewer = byId('figure-viewer');
+  const fit = () => sizeFigure(viewer);
+  viewer.querySelector('img').addEventListener('load', fit);
+  new ResizeObserver(fit).observe(viewer.querySelector('.viewer-stage'));
   const zoomControl = byId('viewer-zoom');
   zoomControl.addEventListener('click', () => {
     const actualSize = viewer.classList.toggle('actual-size');
     zoomControl.textContent = actualSize ? 'Fit to screen' : 'Actual size';
+    fit();
     viewer.querySelector('.viewer-stage').scrollTo(0, 0);
   });
   byId('viewer-close').addEventListener('click', () => viewer.close());
   viewer.addEventListener('click', event => {
     if (event.target === viewer) viewer.close();
   });
+}
+
+function archive() {
   const counts = histogram(papers, 'rank');
   const weight = label => labelOrder.includes(label) ? labelOrder.indexOf(label) : labelOrder.length;
   const rankOrder = (a,b) => weight(a) - weight(b) || a.localeCompare(b);
@@ -182,3 +205,19 @@ function archive() {
 
 if (byId('chart')) drawChart();
 if (byId('filters')) archive();
+
+if (byId('figure-viewer')) setupFigureViewer();
+for (const button of document.querySelectorAll('.figure-pair button')) {
+  button.addEventListener('click', () => {
+    const viewer = byId('figure-viewer');
+    const thumbnail = button.querySelector('img');
+    const image = viewer.querySelector('img');
+    viewer.classList.remove('actual-size');
+    byId('viewer-zoom').textContent = 'Actual size';
+    byId('viewer-title').textContent = button.closest('figure').querySelector('figcaption').textContent;
+    image.alt = thumbnail.alt;
+    image.src = thumbnail.src;
+    viewer.showModal();
+    sizeFigure(viewer);
+  });
+}
